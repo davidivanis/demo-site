@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROBA</title>
+    <style>
+      @font-face {
+        font-family: "BlumenRegular";
+        src: url("BlumenRegular.otf") format("opentype");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      body {
+        background-color:#ccd3e2;
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      a:hover {
+        color: #f7e315;
+      }
+
+      #main {
+        padding: 2rem;
+        transition: filter 0.3s;
+      }
+      #main.dimmed {
+        /* filter: blur(4px); */
+        opacity: 0.3;
+        pointer-events: none;
+      }
+      #overlay {
+        position: fixed;
+        top: 180px;
+        right: 0%;
+        width: 82%;
+        height: 100%;
+        background: #062563;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 1s ease;
+      }
+      #overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .link {
+        position: fixed;
+        top: 300px;
+        color: #b99c61;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      #persistent-banner {
+        display: inline-block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        max-width: 40%;
+        background: transparent;
+        z-index: 1100; /* higher than overlay */
+        padding: 1rem;
+        text-align: center;
+        font-size: 3em;
+        font-family: "BlumenRegular", sans-serif;
+      }
+
+      .tri-header .center {
+        font-size: 9em;
+        font-family: "BlumenRegular", sans-serif;
+        color: #062563;
+      }
+
+      .tri-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        background-color: transparent;
+        position: relative;
+      }
+
+      /* .center:hover {
+        color: #062563;
+        opacity: 0.5;
+        background-color: yellow;
+      } */
+
+      /* body:hover {
+        color: #f7e315;
+        opacity: 0.5;
+        background-color: #062563;
+      } */
+
+      main {
+        font-weight: 300;
+        font-style: normal;
+        font-size: 20px;
+        color: #062563;
+      }
+
+      .center {
+        font-size: 9em;
+        font-family: "BlumenRegular", sans-serif;
+        color: #062563;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -ms-transform: translateX(-50%) translateY(-50%);
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        opacity: 0.07;
+      }
+
+      .center::selection {
+        background-color: transparent;
+      }
+
+      #navigation {
+        position: fixed;
+        left: 20px;
+        top: 6px;
+        z-index: 10;
+        width: 1px;
+        height: 1px;
+        font-family: "BlumenRegular", sans-serif;
+      }
+
+      #navigation h1 {
+        white-space: nowrap;
+        color: black;
+        font-family: "BlumenRegular", sans-serif;
+        color: #062563;
+        font-size: 3em;
+        letter-spacing: 0.02em;
+        margin-bottom: 0;
+      }
+
+      #navigation h3 {
+        font-size: 36px;
+        line-height: 30px;
+        font-weight: normal;
+        white-space: nowrap;
+      }
+      
+      #navigation a {
+        font-size: 1.5em;
+        line-height: 20px;
+        letter-spacing: 0;
+        white-space: nowrap;
+        text-decoration: none;
+        color: #062563;
+      }
+      a:hover {
+        color: #a8a8a8;
+      }
+      .active,
+      .active a {
+        color: #a8a8a8;
+      }
+
+      a {
+        color: #000;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .menu {
+        padding-left: 30px;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+
+      .split-layout {
+        display: flex;
+        flex-direction: row;
+        height: 100vh; /* Full screen height */
+        overflow: hidden; /* Prevent body scroll */
+      }
+
+      .sidebar {
+        flex: 2;
+        z-index: 10;
+        background-color: #ccd3e2;
+        overflow-y: auto;
+        /* Hide scrollbar cross-browser */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+      }
+
+      .main-content-2::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+
+      .event {
+        padding: 0.75rem 0;
+        /* border-bottom: solid 1px rgb(4, 4, 38); */
+        font-family: "BlumenRegular", sans-serif;
+        padding-left: 30px;
+        padding-bottom: 40px;
+        position: fixed;
+        left: 20px;
+        bottom: 60px;
+      }
+
+      .event:last-child {
+        border-bottom: none; /* remove line after the last event */
+      }
+
+      .event .day {
+        font-size: 1em;
+      }
+
+      .event .date {
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+
+      .event .author {
+        font-size: 1.5em;
+        margin-top: 0.25rem;
+      }
+
+      .event .title {
+        font-size: 2em;
+        margin-top: 0.25rem;
+        font-family: "BlumenRegular", sans-serif;
+      }
+
+      .event .type {
+        font-size: 1em;
+        margin-top: 0.25rem;
+      }
+
+      .event .venue {
+        font-size: 1em;
+        margin-top: 0.25rem;
+      }
+
+      .spacer-top{
+        height: 100vh;
+      }
+
+      .main-content-3 .spacer-top{
+        height: 100vh;
+      }
+
+      .spacer-bottom{
+        height: 100vh;
+      }
+
+      .description{
+        transform: translateY(100vh); /* Start completely off screen */
+        transition: transform 5s ease;
+      }
+
+      .description.show {
+        transform: translateY(-300px); /* End position: 100px above bottom */
+      }
+
+      .biography{
+        transform: translateY(100vh); /* Start completely off screen */
+        transition: transform 7s ease;
+      }
+
+      .biography.show {
+        transform: translateY(-100px); /* End position: 100px above bottom */
+      }
+
+      .main-content-1 {
+        flex: 2;
+        background-color: transparent;
+        /* overflow-y: auto; */
+        padding-right: 20px;
+        z-index: 100;
+        overflow-y: auto;
+        /* Hide scrollbar cross-browser */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        /* padding-top: 550px; */
+      }
+
+      .main-content-1 p {
+        /* text-align: justify; */
+        padding: 10px;
+        hyphens: auto;
+        color: #062563;
+        background-color: transparent;
+        opacity: 0.4;
+        /* display: inline; */
+      }
+
+      .main-content-1 p:hover{
+        /* text-align: justify; */
+        hyphens: auto;
+        color: #062563;
+        background-color: #f7e315;
+        transition: background-color 0.8s ease-in;
+        opacity: 1;
+      }
+
+      .main-content-2 {
+        flex: 1;
+        background-color: transparent;
+        /* overflow-y: auto; */
+        overflow-y: auto;
+        /* Hide scrollbar cross-browser */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        padding-left: 20px;
+        padding-top: 580px;
+      }
+
+      .main-content-3 {
+        flex: 2;
+        background-color: transparent;
+        /* overflow-y: auto; */
+        z-index: 100;
+        padding-left: 20px;
+        padding-right: 20px;
+        color: #f7e315;
+        overflow-y: auto;
+        /* Hide scrollbar cross-browser */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+
+      .main-content-3 p {
+        /* text-align: justify; */
+        padding: 10px;
+        hyphens: auto;
+        color: #062563;
+        background-color: transparent;
+        opacity: 0.4;
+        /* display: inline; */
+      }
+
+      .main-content-3 p:hover{
+        /* text-align: justify; */
+        hyphens: auto;
+        color: #062563;
+        background-color:#f7e315;
+        opacity: 1;
+        transition: background-color 1.5s ease;
+      }
+
+      .main-content-3 .biography{
+        /* text-align: justify; */
+        hyphens: auto;
+      }
+
+      .event-link{
+        color: black;
+        text-decoration: none;
+      }
+
+      .event-img{
+        position: fixed;
+        top: 0px;
+        right: 0px;
+        width: 70%;
+        /* top: 0px;
+        bottom: 0px;
+        width: 100%; */
+      }
+
+      /* .tri-header .center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      } */
+    </style>
+  </head>
+  <body>
+    <header class="tri-header"></header>
+    <main class="split-layout">
+      <!-- <div id="main">
+      <a href="page2.html" class="ajax-link link">Open Overlay Page</a>
+    </div> -->
+     <!-- <div class="center">PoslijeSvijet</div> -->
+      <aside class="sidebar">
+        <div id="navigation" style="z-index: 101">
+          <h1 class="festival_name">PoslijeSvijet</h1>
+          <div class="menu">
+          <ul>
+            <li><a id="nav17" href=>o festivalu</a></li>
+            <li><a id="nav21" href=>povijest</a></li>
+            <li><a id="nav26" href=>program25</a></li>
+            <li><a id="nav27" href=>kontakt</a></li>
+            <li>
+              <a id="nav29" href="#/press" class="">festivalske lokacije</a>
+            </li>
+          </ul>
+        </div>
+        </div>
+        <div class="event">
+          <div class="date">sub. 18.10.</div>
+          <div class="author">Ashkan Sepahvand</div>
+          <div class="title">Seeking For Story</div>
+          <div class="type">film screening</div>
+          <div class="venue">MAMA kino</div>
+        </div>
+      </aside>
+      <img class="event-img" src="Seeking-story.png" alt="">
+      <section class="main-content-1">
+        <div class="spacer-top"></div>
+        <p class="description">
+          Ashkan Sepvenhand uzima riječ faggot iz engleskog slenga kao polazište
+          za dekolonizaciju seksualnog identiteta i radikalizaciju politike
+          drugosti. Krećući se između simboličkih arhiva kvir i iranskih
+          studija, negovo istrživanje predlaže asinkronu isprepletenost između
+          neuspjeha “pederske revolucije" i geopolitičke propasti modernog
+          Irana. Prevodi "faggot” u luti i kunmraz, figure drugosti u iranskoj
+          kulturi, kako bi pratio transhistorijsku simptomatologiju borbe i
+          žrtve. Ashakan Sepvenhand zagovara "sodomsku maštu" kao fantaziju
+          dislokacije i narativ nesposjedovanja koji suočava
+          kolonijalno-kapitalistički sustav s radikalno političkim užitkom
+          nedostatka.
+        </p>
+        <div class="spacer-bottom"></div>
+      </section>
+      <section class="main-content-3">
+        <div class="spacer-top"></div>
+        <p class="biography">
+          ASHKAN SEPAHVAND (1984, Teheran) je umjetnik istraživač koji živi i
+          radi između Oxforda (UK) i Berlina (DE). Njegova
+          performativno-diskurzivna praksa eksperimentira s načinima na koje se
+          oblici znanja senzorno prevode i doživljavaju, poprimajući oblik
+          publikacija, situacija, izložbi i interdisciplinarnih suradnji. Radio
+          je kao istraživački suradnik u Schwules Museum (2016.-2017.), gdje je
+          kurirao izložbu "Odarodle - an imaginary their_story of naturepeoples,
+          1535-2017," i u Haus der Kulturen der Welt (2012.-2014.), gdje je
+          suuredio publikaciju "Textures of the Anthropocene: Grain, Vapor, Ray"
+          (The MIT Press, 2015). Godine 2010. suosnovao je institut za neskladni
+          prijevod s Nataschom Sadr Haghighian kao okvir za njihovo zajedničko
+          istraživanje, uključujući projekte "seeing studies" (2010.-2012.) i
+          "Carbon Theater" (2016.-danas). Njegovi radovi i spisi bili su
+          predstavljeni na 58. Venecijanskom bijenalu, dOCUMENTA (13), Sharjah
+          Biennials X i 13, Gwangju Biennale 11, Ashkal Alwan, Sursock Museum i
+          ICA London, među ostalima. Trenutno završava svoj doktorat iz likovne
+          umjetnosti na Ruskin School of Art i St. John’s Collegeu, Sveučilište
+          u Oxfordu, gdje je Clarendon-AHRC stipendist.
+        </p>
+        <div class="spacer-bottom"></div>
+      </section>
+      <section class="main-content-2">
+
+      </section>
+
+      <div id="overlay"></div>
+    </main>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+          requestAnimationFrame(() => {
+            document.querySelector('.description').classList.add('show');
+          });
+        });
+    </script>
+
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+      requestAnimationFrame(() => {
+        document.querySelector('.biography').classList.add('show');
+      });
+    });
+</script>
+
+    <script>
+      const overlay = document.getElementById("overlay");
+      const main = document.getElementById("main");
+
+      document.querySelectorAll("a.ajax-link").forEach((link) => {
+        link.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const url = link.href;
+          const res = await fetch(url);
+          const html = await res.text();
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+          const content = doc.querySelector("#main");
+          const style = doc.querySelector("style");
+
+          overlay.innerHTML = content.innerHTML;
+          overlay.classList.add("visible");
+          main.classList.add("dimmed");
+          history.pushState({}, "", url);
+
+          if (style) {
+            let existingStyle = document.getElementById("injected-style");
+            if (existingStyle) existingStyle.remove();
+
+            const newStyle = document.createElement("style");
+            newStyle.id = "injected-style";
+            newStyle.textContent = style.textContent;
+            document.head.appendChild(newStyle);
+          }
+        });
+      });
+
+      window.addEventListener("popstate", () => {
+        closeOverlay();
+      });
+
+      function closeOverlay() {
+        overlay.classList.remove("visible");
+        main.classList.remove("dimmed");
+        history.pushState({}, "", "index.html");
+      }
+    </script>
+  </body>
+</html>
