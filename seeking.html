@@ -276,7 +276,7 @@
       .biography.show {
         transform: translateY(-100px); /* End position: 100px above bottom */
       }
-
+      
       .main-content-1 {
         flex: 2;
         background-color: transparent;
@@ -468,13 +468,21 @@
         });
     </script>
 
-<script>
+     <script>
+        window.addEventListener("DOMContentLoaded", () => {
+          requestAnimationFrame(() => {
+            document.querySelector('.description').classList.add('show');
+          });
+        });
+    </script>
+
+    <script>
     window.addEventListener("DOMContentLoaded", () => {
       requestAnimationFrame(() => {
         document.querySelector('.biography').classList.add('show');
       });
     });
-</script>
+    </script>
 
     <script>
       const overlay = document.getElementById("overlay");
